@@ -13,6 +13,7 @@ const AdminMovies = () => {
   const { addToast } = useToast();
 
   const [formData, setFormData] = useState<Omit<Movie, 'id'>>({
+    type: 'movie',
     title: '',
     description: '',
     genre: '',
@@ -30,6 +31,7 @@ const AdminMovies = () => {
   const openAddModal = () => {
     setEditingId(null);
     setFormData({
+      type: 'movie',
       title: '', description: '', genre: '', language: '',
       duration: '', rating: '', poster: '', releaseDate: ''
     });
@@ -39,6 +41,7 @@ const AdminMovies = () => {
   const openEditModal = (movie: Movie) => {
     setEditingId(movie.id);
     setFormData({
+      type: movie.type || 'movie',
       title: movie.title, description: movie.description, genre: movie.genre,
       language: movie.language, duration: movie.duration, rating: movie.rating,
       poster: movie.poster, releaseDate: movie.releaseDate
@@ -153,6 +156,13 @@ const AdminMovies = () => {
             <div className="p-6 overflow-y-auto">
               <form id="movieForm" onSubmit={handleSubmit} className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="col-span-2">
+                    <label className="block text-sm font-medium text-gray-300 mb-1">Type</label>
+                    <select value={formData.type} onChange={e => setFormData({...formData, type: e.target.value as 'movie' | 'series'})} className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-white focus:border-primary-500 outline-none">
+                      <option value="movie">Movie</option>
+                      <option value="series">Series</option>
+                    </select>
+                  </div>
                   <div className="col-span-2">
                     <label className="block text-sm font-medium text-gray-300 mb-1">Title</label>
                     <input required type="text" value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-white focus:border-primary-500 outline-none" />

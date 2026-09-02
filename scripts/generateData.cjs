@@ -37,6 +37,8 @@ const posters = [
 const movieAdjectives = ['The Last', 'Return of', 'Rise of', 'Fall of', 'Legend of', 'Secret of', 'Midnight', 'Crimson', 'Silent', 'Golden', 'Lost', 'Dark', 'Eternal', 'Hidden', 'Phantom'];
 const movieNouns = ['Warrior', 'Kingdom', 'Shadow', 'Hero', 'Ghost', 'Dawn', 'Empire', 'City', 'Knight', 'Spy', 'Assassin', 'Legacy', 'Chronicles', 'Dimension', 'Quest'];
 
+const seriesNouns = ['Files', 'Syndicate', 'Protocol', 'Uprising', 'Saga', 'Awakening', 'Paradox', 'Code', 'Order', 'Rebellion', 'Mansion', 'Island', 'Tribe', 'Cartel', 'Realm'];
+
 function getRandomInt(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
@@ -45,8 +47,10 @@ function getRandomElement(arr) {
   return arr[Math.floor(Math.random() * arr.length)];
 }
 
-// Generate Movies
 const mockMovies = [];
+let mediaId = 1;
+
+// Generate Movies (~150)
 for (let i = 1; i <= 150; i++) {
   const isReal = i <= 10;
   const title = isReal ? 
@@ -54,7 +58,8 @@ for (let i = 1; i <= 150; i++) {
     `${getRandomElement(movieAdjectives)} ${getRandomElement(movieNouns)}`;
   
   mockMovies.push({
-    id: `m${i}`,
+    id: `m${mediaId++}`,
+    type: 'movie',
     title,
     description: `An epic cinematic experience exploring themes of adventure, drama, and action in ${title}.`,
     genre: getRandomElement(genres),
@@ -66,7 +71,30 @@ for (let i = 1; i <= 150; i++) {
   });
 }
 
-// Generate Theatres
+// Generate Series (~150)
+for (let i = 1; i <= 150; i++) {
+  const isReal = i <= 5;
+  const title = isReal ? 
+    ['Stranger Things', 'Game of Thrones', 'Mirzapur', 'The Boys', 'Breaking Bad'][i-1] :
+    `${getRandomElement(movieAdjectives)} ${getRandomElement(seriesNouns)}`;
+  
+  const seasons = getRandomInt(1, 8);
+  mockMovies.push({
+    id: `m${mediaId++}`,
+    type: 'series',
+    title,
+    description: `A gripping episodic journey through the complex world of ${title}.`,
+    genre: getRandomElement(genres),
+    language: getRandomElement(languages),
+    duration: `Season ${seasons}`,
+    seasons: seasons,
+    rating: getRandomElement(ratings),
+    poster: getRandomElement(posters), // Reusing posters for mock purposes
+    releaseDate: `2026-${String(getRandomInt(1, 12)).padStart(2, '0')}-${String(getRandomInt(1, 28)).padStart(2, '0')}`
+  });
+}
+
+// Generate Theatres (~150)
 const mockTheatres = [];
 for (let i = 1; i <= 150; i++) {
   mockTheatres.push({
@@ -77,23 +105,23 @@ for (let i = 1; i <= 150; i++) {
   });
 }
 
-// Generate Shows
+// Generate Shows (using both movies and series for premieres)
 const mockShows = [];
 let showId = 1;
-// Give each theatre 5-10 shows
+// Give each theatre 5-12 shows
 mockTheatres.forEach(theatre => {
   const numShows = getRandomInt(5, 12);
-  const selectedMovies = [];
-  // select a few random movies for this theatre
+  const selectedMedia = [];
+  // select a few random movies/series for this theatre
   for (let j = 0; j < 5; j++) {
-    selectedMovies.push(getRandomElement(mockMovies).id);
+    selectedMedia.push(getRandomElement(mockMovies).id);
   }
   
   for (let s = 0; s < numShows; s++) {
     const times = ['09:00 AM', '11:15 AM', '01:30 PM', '04:00 PM', '07:15 PM', '09:45 PM', '10:30 PM'];
     mockShows.push({
       id: `s${showId++}`,
-      movieId: getRandomElement(selectedMovies),
+      movieId: getRandomElement(selectedMedia),
       theatreId: theatre.id,
       date: '2026-09-10', // Focus on a specific date for simplicity in demo
       time: getRandomElement(times),
@@ -141,4 +169,4 @@ export const mockSnacks: SnackItem[] = [
 `;
 
 fs.writeFileSync(path.join(__dirname, '../src/data/mockData.ts'), fileContent);
-console.log('Successfully generated massive mockData.ts');
+console.log('Successfully generated massive mockData.ts with Series!');

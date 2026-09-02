@@ -10,6 +10,7 @@ const Movies = () => {
   const [movies, setMovies] = useState<Movie[]>([]);
   const [filteredMovies, setFilteredMovies] = useState<Movie[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [typeFilter, setTypeFilter] = useState('');
   const [genreFilter, setGenreFilter] = useState('');
   const [languageFilter, setLanguageFilter] = useState('');
 
@@ -26,6 +27,10 @@ const Movies = () => {
       result = result.filter(m => m.title.toLowerCase().includes(searchTerm.toLowerCase()));
     }
     
+    if (typeFilter) {
+      result = result.filter(m => m.type === typeFilter);
+    }
+    
     if (genreFilter) {
       result = result.filter(m => m.genre.includes(genreFilter));
     }
@@ -35,7 +40,7 @@ const Movies = () => {
     }
 
     setFilteredMovies(result);
-  }, [searchTerm, genreFilter, languageFilter, movies]);
+  }, [searchTerm, typeFilter, genreFilter, languageFilter, movies]);
 
   // Extract unique genres and languages for filters
   const genres = Array.from(new Set(movies.flatMap(m => m.genre.split(', '))));
@@ -53,8 +58,8 @@ const Movies = () => {
         animate={{ y: 0, opacity: 1 }}
         className="mb-10"
       >
-        <h1 className="text-4xl font-bold text-white mb-4">Explore Movies</h1>
-        <p className="text-gray-400">Discover and book tickets for the latest movies.</p>
+        <h1 className="text-4xl font-bold text-white mb-4">Explore Content</h1>
+        <p className="text-gray-400">Discover and book tickets for the latest movies and exclusive series.</p>
       </motion.div>
 
       <motion.div 
@@ -67,15 +72,25 @@ const Movies = () => {
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
           <input 
             type="text" 
-            placeholder="Search movies..." 
+            placeholder="Search titles..." 
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full bg-gray-900/50 border border-gray-700 text-white rounded-xl pl-12 pr-4 py-3 focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 transition-all shadow-inner"
           />
         </div>
         
-        <div className="flex gap-4">
-          <div className="relative flex-1 md:flex-none">
+        <div className="flex gap-4 overflow-x-auto pb-2 md:pb-0">
+          <select 
+            value={typeFilter}
+            onChange={(e) => setTypeFilter(e.target.value)}
+            className="flex-none bg-gray-900/50 border border-gray-700 text-white rounded-xl px-4 py-3 focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 transition-all cursor-pointer shadow-inner"
+          >
+            <option value="">All Types</option>
+            <option value="movie">Movies</option>
+            <option value="series">Series</option>
+          </select>
+          
+          <div className="relative flex-none">
             <Filter className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
             <select 
               value={genreFilter}
@@ -124,10 +139,11 @@ const Movies = () => {
           animate={{ opacity: 1 }}
           className="text-center py-20 glass rounded-2xl border border-gray-800"
         >
-          <h3 className="text-xl font-bold text-white mb-2">No movies found</h3>
+          <h3 className="text-xl font-bold text-white mb-2">No content found</h3>
           <p className="text-gray-400 mb-6">Try adjusting your filters or search term.</p>
           <Button variant="outline" onClick={() => {
             setSearchTerm('');
+            setTypeFilter('');
             setGenreFilter('');
             setLanguageFilter('');
           }}>

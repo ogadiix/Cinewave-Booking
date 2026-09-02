@@ -12,11 +12,13 @@ export interface User {
 
 export interface Movie {
   id: string;
+  type: 'movie' | 'series';
   title: string;
   description: string;
   genre: string;
   language: string;
-  duration: string; // e.g., "150 min"
+  duration: string; // e.g., "150 min" or "Season 1"
+  seasons?: number; // for series
   rating: string; // e.g., "UA", "A"
   poster: string;
   releaseDate: string;

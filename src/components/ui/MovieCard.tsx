@@ -36,8 +36,13 @@ const MovieCard = ({ movie }: MovieCardProps) => {
         </div>
         
         {/* Badges */}
-        <div className="absolute top-4 left-4 flex gap-2">
-          <Badge variant="success" className="bg-green-500/80 text-white border-none shadow-sm">{movie.rating}</Badge>
+        <div className="absolute top-4 left-4 flex flex-col gap-2">
+          <div className="flex gap-2">
+            <Badge variant="success" className="bg-green-500/80 text-white border-none shadow-sm">{movie.rating}</Badge>
+            {movie.type === 'series' && (
+              <Badge variant="default" className="bg-primary-500/80 text-white border-none shadow-sm">SERIES</Badge>
+            )}
+          </div>
         </div>
       </div>
       
