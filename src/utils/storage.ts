@@ -13,7 +13,7 @@ const KEYS = {
   CURRENT_USER: 'cinewave_current_user',
 };
 
-const DATA_VERSION = 'v6';
+const DATA_VERSION = 'v7';
 
 // Initialize mock data if not present or version changed
 export const initializeData = () => {
