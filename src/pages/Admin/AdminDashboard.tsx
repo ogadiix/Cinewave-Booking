@@ -3,6 +3,7 @@ import { getMovies, getTheatres, getShows, getUsers, getBookings, getPromoCodes,
 import { Users, Film, MapPin, CalendarClock, DollarSign, Ticket, Tag, Coffee } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, BarChart, Bar, Cell } from 'recharts';
 
 const AdminDashboard = () => {
   const [stats, setStats] = useState({
@@ -15,6 +16,26 @@ const AdminDashboard = () => {
     snacks: 0,
     revenue: 0
   });
+
+  const revenueData = [
+    { name: 'Mon', revenue: 15000 },
+    { name: 'Tue', revenue: 23000 },
+    { name: 'Wed', revenue: 18000 },
+    { name: 'Thu', revenue: 29000 },
+    { name: 'Fri', revenue: 45000 },
+    { name: 'Sat', revenue: 62000 },
+    { name: 'Sun', revenue: 58000 },
+  ];
+
+  const popularData = [
+    { name: 'Kalki 2898 AD', sales: 4500 },
+    { name: 'Stranger Things', sales: 3200 },
+    { name: 'Jawan', sales: 2800 },
+    { name: 'Game of Thrones', sales: 2100 },
+    { name: 'Oppenheimer', sales: 1800 },
+  ];
+  
+  const colors = ['#06b6d4', '#fbbf24', '#ec4899', '#8b5cf6', '#10b981'];
 
   useEffect(() => {
     const users = getUsers();
@@ -43,7 +64,7 @@ const AdminDashboard = () => {
 
   const statCards = [
     { title: 'Total Users', value: stats.users, icon: <Users size={24} />, color: 'text-blue-500', bg: 'bg-blue-500/20', link: '/admin/users' },
-    { title: 'Movies', value: stats.movies, icon: <Film size={24} />, color: 'text-purple-500', bg: 'bg-purple-500/20', link: '/admin/movies' },
+    { title: 'Content', value: stats.movies, icon: <Film size={24} />, color: 'text-purple-500', bg: 'bg-purple-500/20', link: '/admin/movies' },
     { title: 'Theatres', value: stats.theatres, icon: <MapPin size={24} />, color: 'text-pink-500', bg: 'bg-pink-500/20', link: '/admin/theatres' },
     { title: 'Shows', value: stats.shows, icon: <CalendarClock size={24} />, color: 'text-orange-500', bg: 'bg-orange-500/20', link: '/admin/shows' },
     { title: 'Promo Codes', value: stats.promoCodes, icon: <Tag size={24} />, color: 'text-yellow-500', bg: 'bg-yellow-500/20', link: '/admin/promocodes' },
@@ -52,24 +73,40 @@ const AdminDashboard = () => {
     { title: 'Revenue', value: `₹${stats.revenue}`, icon: <DollarSign size={24} />, color: 'text-primary-500', bg: 'bg-primary-500/20', link: '#' },
   ];
 
+  const CustomTooltip = ({ active, payload, label }: any) => {
+    if (active && payload && payload.length) {
+      const isRevenue = payload[0].name === 'revenue';
+      const formattedValue = payload[0].value.toLocaleString();
+      return (
+        <div className="bg-gray-900 border border-gray-700 p-3 rounded-lg shadow-xl">
+          <p className="text-white font-medium">{label}</p>
+          <p className="text-primary-400 font-bold">
+            {isRevenue ? `₹${formattedValue}` : `${formattedValue} tickets`}
+          </p>
+        </div>
+      );
+    }
+    return null;
+  };
+
   return (
     <motion.div 
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="max-w-7xl mx-auto"
+      className="max-w-7xl mx-auto pb-10"
     >
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-white mb-2">Admin Dashboard</h1>
         <p className="text-gray-400">System overview and management statistics.</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         {statCards.map((card, idx) => (
           <motion.div
             key={idx}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: idx * 0.1 }}
+            transition={{ delay: idx * 0.05 }}
           >
             <Link to={card.link} className="block h-full">
               <div className="glass p-6 rounded-xl border border-gray-800 hover:border-gray-700 transition-colors group h-full">
@@ -79,7 +116,7 @@ const AdminDashboard = () => {
                   </div>
                   <div>
                     <p className="text-sm text-gray-400 mb-1">{card.title}</p>
-                    <h3 className="text-3xl font-bold text-white">{card.value}</h3>
+                    <h3 className="text-2xl font-bold text-white">{card.value}</h3>
                   </div>
                 </div>
               </div>
@@ -89,52 +126,49 @@ const AdminDashboard = () => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <div className="glass p-6 rounded-xl border border-gray-800 h-80 flex flex-col justify-center items-center relative overflow-hidden">
-          <div className="absolute top-0 left-0 w-full p-4 border-b border-gray-800 text-white font-bold">Revenue Trend</div>
-          
-          {/* Simple CSS Chart Visualization */}
-          <div className="flex items-end gap-4 h-40 w-full px-8 mt-12">
-            {[40, 70, 45, 90, 65, 80, 100].map((h, i) => (
-              <div key={i} className="flex-1 bg-primary-600/50 hover:bg-primary-500 rounded-t-md relative group transition-colors" style={{ height: `${h}%` }}>
-                <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-gray-800 text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10 text-white">
-                  Day {i+1}
-                </div>
-              </div>
-            ))}
+        <motion.div 
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.4 }}
+          className="glass p-6 rounded-xl border border-gray-800 flex flex-col h-96"
+        >
+          <h2 className="text-lg font-bold text-white mb-6">Weekly Revenue Trend</h2>
+          <div className="flex-1 w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={revenueData} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#374151" vertical={false} />
+                <XAxis dataKey="name" stroke="#9ca3af" tick={{fill: '#9ca3af'}} axisLine={false} tickLine={false} />
+                <YAxis stroke="#9ca3af" tick={{fill: '#9ca3af'}} axisLine={false} tickLine={false} tickFormatter={(value) => `₹${value/1000}k`} />
+                <RechartsTooltip content={<CustomTooltip />} cursor={{ stroke: '#4b5563', strokeWidth: 1, strokeDasharray: '3 3' }} />
+                <Line type="monotone" dataKey="revenue" stroke="#fbbf24" strokeWidth={3} dot={{ r: 4, fill: '#fbbf24', strokeWidth: 0 }} activeDot={{ r: 6, fill: '#fff', stroke: '#fbbf24', strokeWidth: 2 }} />
+              </LineChart>
+            </ResponsiveContainer>
           </div>
-          <div className="w-full px-8 mt-2 flex justify-between text-xs text-gray-500">
-            <span>Mon</span>
-            <span>Tue</span>
-            <span>Wed</span>
-            <span>Thu</span>
-            <span>Fri</span>
-            <span>Sat</span>
-            <span>Sun</span>
-          </div>
-        </div>
+        </motion.div>
 
-        <div className="glass p-6 rounded-xl border border-gray-800 h-80 flex flex-col justify-center items-center relative overflow-hidden">
-          <div className="absolute top-0 left-0 w-full p-4 border-b border-gray-800 text-white font-bold">Popular Movies</div>
-          
-          <div className="w-full px-6 mt-12 space-y-4">
-            {[
-              { name: 'Avengers', pct: 85, color: 'bg-blue-500' },
-              { name: 'Interstellar', pct: 65, color: 'bg-purple-500' },
-              { name: 'Inception', pct: 45, color: 'bg-pink-500' },
-              { name: 'The Dark Knight', pct: 30, color: 'bg-orange-500' },
-            ].map((movie, i) => (
-              <div key={i} className="w-full">
-                <div className="flex justify-between text-xs mb-1 text-gray-400">
-                  <span>{movie.name}</span>
-                  <span>{movie.pct}%</span>
-                </div>
-                <div className="h-2 w-full bg-gray-800 rounded-full overflow-hidden">
-                  <div className={`h-full ${movie.color} rounded-full`} style={{ width: `${movie.pct}%` }} />
-                </div>
-              </div>
-            ))}
+        <motion.div 
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.5 }}
+          className="glass p-6 rounded-xl border border-gray-800 flex flex-col h-96"
+        >
+          <h2 className="text-lg font-bold text-white mb-6">Top Performing Content</h2>
+          <div className="flex-1 w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={popularData} layout="vertical" margin={{ top: 5, right: 30, bottom: 5, left: 40 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#374151" horizontal={true} vertical={false} />
+                <XAxis type="number" stroke="#9ca3af" tick={{fill: '#9ca3af'}} axisLine={false} tickLine={false} />
+                <YAxis dataKey="name" type="category" stroke="#9ca3af" tick={{fill: '#e5e7eb', fontSize: 12}} axisLine={false} tickLine={false} width={100} />
+                <RechartsTooltip content={<CustomTooltip />} cursor={{fill: '#374151', opacity: 0.4}} />
+                <Bar dataKey="sales" radius={[0, 4, 4, 0]} barSize={20}>
+                  {popularData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
           </div>
-        </div>
+        </motion.div>
       </div>
     </motion.div>
   );

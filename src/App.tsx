@@ -36,6 +36,58 @@ import AdminPromoCodes from './pages/Admin/AdminPromoCodes';
 import AdminSnacks from './pages/Admin/AdminSnacks';
 
 
+import { AnimatePresence } from 'framer-motion';
+import { useLocation } from 'react-router-dom';
+
+const AppRoutes = () => {
+  const location = useLocation();
+  
+  return (
+    <AnimatePresence mode="wait">
+      <Routes location={location} key={location.pathname}>
+        <Route element={<MainLayout />}>
+          <Route path="/" element={<Home />} />
+          <Route path="/movies" element={<Movies />} />
+          <Route path="/movie/:id" element={<MovieDetails />} />
+          <Route path="/theatres" element={<Theatres />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/contact" element={<Contact />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          
+          <Route path="/booking/seats" element={<SeatSelection />} />
+          <Route path="/booking/summary" element={<BookingSummary />} />
+          <Route path="/booking/confirmation" element={<BookingConfirmation />} />
+          <Route path="/ticket/:id" element={<DigitalTicket />} />
+        </Route>
+
+        <Route path="/customer" element={<DashboardLayout />}>
+          <Route path="dashboard" element={<CustomerDashboard />} />
+          <Route path="bookings" element={<MyBookings />} />
+          <Route path="profile" element={<Profile />} />
+          <Route index element={<Navigate to="dashboard" replace />} />
+        </Route>
+
+        <Route path="/staff" element={<DashboardLayout />}>
+          <Route path="dashboard" element={<StaffDashboard />} />
+          <Route path="bookings" element={<StaffBookings />} />
+          <Route index element={<Navigate to="dashboard" replace />} />
+        </Route>
+
+        <Route path="/admin" element={<DashboardLayout />}>
+          <Route path="dashboard" element={<AdminDashboard />} />
+          <Route path="movies" element={<AdminMovies />} />
+          <Route path="theatres" element={<AdminTheatres />} />
+          <Route path="shows" element={<AdminShows />} />
+          <Route path="promocodes" element={<AdminPromoCodes />} />
+          <Route path="snacks" element={<AdminSnacks />} />
+          <Route index element={<Navigate to="dashboard" replace />} />
+        </Route>
+      </Routes>
+    </AnimatePresence>
+  );
+};
+
 function App() {
   useEffect(() => {
     initializeData();
@@ -44,46 +96,7 @@ function App() {
   return (
     <ToastProvider>
       <Router>
-        <Routes>
-          <Route element={<MainLayout />}>
-            <Route path="/" element={<Home />} />
-            <Route path="/movies" element={<Movies />} />
-            <Route path="/movie/:id" element={<MovieDetails />} />
-            <Route path="/theatres" element={<Theatres />} />
-            <Route path="/about" element={<About />} />
-            <Route path="/contact" element={<Contact />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            
-            <Route path="/booking/seats" element={<SeatSelection />} />
-            <Route path="/booking/summary" element={<BookingSummary />} />
-            <Route path="/booking/confirmation" element={<BookingConfirmation />} />
-            <Route path="/ticket/:id" element={<DigitalTicket />} />
-          </Route>
-
-          <Route path="/customer" element={<DashboardLayout />}>
-            <Route path="dashboard" element={<CustomerDashboard />} />
-            <Route path="bookings" element={<MyBookings />} />
-            <Route path="profile" element={<Profile />} />
-            <Route index element={<Navigate to="dashboard" replace />} />
-          </Route>
-
-          <Route path="/staff" element={<DashboardLayout />}>
-            <Route path="dashboard" element={<StaffDashboard />} />
-            <Route path="bookings" element={<StaffBookings />} />
-            <Route index element={<Navigate to="dashboard" replace />} />
-          </Route>
-
-          <Route path="/admin" element={<DashboardLayout />}>
-            <Route path="dashboard" element={<AdminDashboard />} />
-            <Route path="movies" element={<AdminMovies />} />
-            <Route path="theatres" element={<AdminTheatres />} />
-            <Route path="shows" element={<AdminShows />} />
-            <Route path="promocodes" element={<AdminPromoCodes />} />
-            <Route path="snacks" element={<AdminSnacks />} />
-            <Route index element={<Navigate to="dashboard" replace />} />
-          </Route>
-        </Routes>
+        <AppRoutes />
       </Router>
     </ToastProvider>
   );
