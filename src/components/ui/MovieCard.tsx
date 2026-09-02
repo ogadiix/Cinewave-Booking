@@ -4,6 +4,7 @@ import { Play, Star, Clock } from 'lucide-react';
 import type { Movie } from '../../types';
 import Button from './Button';
 import Badge from './Badge';
+import { motion } from 'framer-motion';
 
 interface MovieCardProps {
   movie: Movie;
@@ -11,7 +12,12 @@ interface MovieCardProps {
 
 const MovieCard = ({ movie }: MovieCardProps) => {
   return (
-    <div className="group relative rounded-xl overflow-hidden bg-gray-900 border border-gray-800 transition-all hover:shadow-2xl hover:shadow-primary-500/20 hover:-translate-y-1">
+    <motion.div 
+      whileHover={{ y: -8, scale: 1.02 }}
+      whileTap={{ scale: 0.98 }}
+      transition={{ type: "spring", stiffness: 300, damping: 20 }}
+      className="group relative rounded-xl overflow-hidden bg-gray-900 border border-gray-800 hover:shadow-2xl hover:shadow-primary-500/20"
+    >
       <div className="aspect-[2/3] relative overflow-hidden">
         <img 
           src={movie.poster} 
@@ -55,13 +61,13 @@ const MovieCard = ({ movie }: MovieCardProps) => {
           {movie.genre}
         </p>
         
-        <Link to={`/movies/${movie.id}`} className="block w-full">
+        <Link to={`/movie/${movie.id}`} className="block w-full">
           <Button variant="primary" className="w-full">
             Book Tickets
           </Button>
         </Link>
       </div>
-    </div>
+    </motion.div>
   );
 };
 

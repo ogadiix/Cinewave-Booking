@@ -5,6 +5,7 @@ import type { Show, Movie, Theatre } from '../../types';
 import Button from '../../components/ui/Button';
 import { useToast } from '../../context/ToastContext';
 import { ArrowLeft, Monitor } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 const SeatSelection = () => {
   const location = useLocation();
@@ -92,7 +93,11 @@ const SeatSelection = () => {
         {/* Main Seat Layout */}
         <div className="flex-1 glass p-8 rounded-2xl border border-gray-800">
           <div className="mb-12">
-            <div className="h-2 bg-primary-500/50 rounded-full w-3/4 mx-auto blur-[2px] mb-2" />
+            <motion.div 
+              animate={{ opacity: [0.5, 1, 0.5], filter: ['blur(2px)', 'blur(4px)', 'blur(2px)'] }}
+              transition={{ duration: 2, repeat: Infinity }}
+              className="h-2 bg-primary-500 rounded-full w-3/4 mx-auto mb-2" 
+            />
             <div className="screen-curve" />
             <p className="text-center text-gray-400 text-sm flex items-center justify-center gap-2">
               <Monitor size={16} /> All eyes this way
@@ -115,22 +120,24 @@ const SeatSelection = () => {
                       
                       return (
                         <React.Fragment key={seatId}>
-                          <button
+                          <motion.button
                             onClick={() => toggleSeat(seatId)}
                             disabled={isBooked}
+                            whileHover={!isBooked ? { scale: 1.15 } : {}}
+                            whileTap={!isBooked ? { scale: 0.9 } : {}}
                             className={`
-                              w-8 h-8 sm:w-10 sm:h-10 rounded-t-lg rounded-b-sm text-xs font-medium transition-all
+                              w-8 h-8 sm:w-10 sm:h-10 rounded-t-lg rounded-b-sm text-xs font-medium transition-colors
                               flex items-center justify-center
                               ${isBooked 
                                 ? 'bg-gray-800 text-gray-600 cursor-not-allowed border border-gray-700' 
                                 : isSelected
-                                  ? 'bg-primary-500 text-white shadow-lg shadow-primary-500/40 transform -translate-y-1'
+                                  ? 'bg-primary-500 text-white shadow-lg shadow-primary-500/40'
                                   : 'bg-gray-700 text-gray-300 hover:bg-gray-600 border border-gray-600'
                               }
                             `}
                           >
                             {isSelected ? seatId : ''}
-                          </button>
+                          </motion.button>
                           {isAisle && <div className="w-4 sm:w-8" />} {/* Aisle */}
                         </React.Fragment>
                       );

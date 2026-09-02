@@ -6,6 +6,7 @@ import { getMovies, getShows, getTheatres } from '../../utils/storage';
 import type { Movie, Show, Theatre } from '../../types';
 import Button from '../../components/ui/Button';
 import Badge from '../../components/ui/Badge';
+import { motion } from 'framer-motion';
 
 import { useLocation } from '../../context/LocationContext';
 
@@ -86,22 +87,40 @@ const MovieDetails = () => {
   };
 
   return (
-    <div className="pb-20">
+    <motion.div 
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="pb-20"
+    >
       {/* Hero Banner */}
       <div className="relative h-[50vh] md:h-[60vh] overflow-hidden bg-black">
-        <div 
-          className="absolute inset-0 opacity-40 bg-cover bg-center filter blur-sm transform scale-105"
+        <motion.div 
+          initial={{ scale: 1.1 }}
+          animate={{ scale: 1 }}
+          transition={{ duration: 1 }}
+          className="absolute inset-0 opacity-40 bg-cover bg-center filter blur-sm"
           style={{ backgroundImage: `url(${movie.poster})` }}
         />
         <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/80 to-transparent" />
         
         <div className="absolute bottom-0 left-0 right-0 p-8">
           <div className="container mx-auto flex flex-col md:flex-row gap-8 items-end">
-            <div className="hidden md:block w-64 h-96 rounded-xl overflow-hidden border-4 border-gray-900 shadow-2xl relative -mb-16 z-10">
+            <motion.div 
+              initial={{ y: 50, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 0.2, type: "spring", stiffness: 100 }}
+              className="hidden md:block w-64 h-96 rounded-xl overflow-hidden border-4 border-gray-900 shadow-2xl relative -mb-16 z-10 shadow-primary-900/40"
+            >
               <img src={movie.poster} alt={movie.title} className="w-full h-full object-cover" />
-            </div>
+            </motion.div>
             
-            <div className="flex-1 text-white z-10 mb-4 md:mb-0">
+            <motion.div 
+              initial={{ x: 50, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              transition={{ delay: 0.3 }}
+              className="flex-1 text-white z-10 mb-4 md:mb-0"
+            >
               <div className="flex gap-2 mb-4">
                 <Badge variant="success" className="bg-green-500/20 text-green-400">{movie.rating}</Badge>
                 <Badge variant="outline">{movie.language}</Badge>
@@ -116,17 +135,22 @@ const MovieDetails = () => {
                 }}>
                   <Ticket className="mr-2" size={20} /> Book Tickets
                 </Button>
-                <Button variant="outline" size="lg" className="rounded-full px-6 glass">
+                <Button variant="outline" size="lg" className="rounded-full px-6 glass hover:bg-white/10 transition-colors">
                   <Play className="mr-2" size={20} /> Watch Trailer
                 </Button>
               </div>
-            </div>
+            </motion.div>
           </div>
         </div>
       </div>
 
       <div className="container mx-auto px-4 mt-20 md:mt-16 grid grid-cols-1 lg:grid-cols-3 gap-12">
-        <div className="lg:col-span-2 space-y-12">
+        <motion.div 
+          initial={{ y: 30, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.5 }}
+          className="lg:col-span-2 space-y-12"
+        >
           {/* About Movie */}
           <section>
             <h2 className="text-2xl font-bold text-white mb-4">About the Movie</h2>
@@ -245,7 +269,7 @@ const MovieDetails = () => {
           </div>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 };
 
