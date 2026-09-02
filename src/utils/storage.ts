@@ -1,5 +1,5 @@
-import type { Movie, Theatre, Show, User, Booking } from '../types';
-import { mockMovies, mockTheatres, mockShows, mockUsers, mockBookings } from '../data/mockData';
+import type { Movie, Theatre, Show, User, Booking, Review, PromoCode, SnackItem } from '../types';
+import { mockMovies, mockTheatres, mockShows, mockUsers, mockBookings, mockReviews, mockPromoCodes, mockSnacks } from '../data/mockData';
 
 const KEYS = {
   MOVIES: 'cinewave_movies',
@@ -7,10 +7,13 @@ const KEYS = {
   SHOWS: 'cinewave_shows',
   USERS: 'cinewave_users',
   BOOKINGS: 'cinewave_bookings',
+  REVIEWS: 'cinewave_reviews',
+  PROMO_CODES: 'cinewave_promo_codes',
+  SNACKS: 'cinewave_snacks',
   CURRENT_USER: 'cinewave_current_user',
 };
 
-const DATA_VERSION = 'v3';
+const DATA_VERSION = 'v6';
 
 // Initialize mock data if not present or version changed
 export const initializeData = () => {
@@ -22,9 +25,12 @@ export const initializeData = () => {
     localStorage.setItem(KEYS.THEATRES, JSON.stringify(mockTheatres));
     localStorage.setItem(KEYS.SHOWS, JSON.stringify(mockShows));
     
-    // Only reset users/bookings if they don't exist
+    // Only reset users/bookings/reviews/promo codes if they don't exist
     if (!localStorage.getItem(KEYS.USERS)) localStorage.setItem(KEYS.USERS, JSON.stringify(mockUsers));
     if (!localStorage.getItem(KEYS.BOOKINGS)) localStorage.setItem(KEYS.BOOKINGS, JSON.stringify(mockBookings));
+    if (!localStorage.getItem(KEYS.REVIEWS)) localStorage.setItem(KEYS.REVIEWS, JSON.stringify(mockReviews));
+    if (!localStorage.getItem(KEYS.PROMO_CODES)) localStorage.setItem(KEYS.PROMO_CODES, JSON.stringify(mockPromoCodes));
+    if (!localStorage.getItem(KEYS.SNACKS)) localStorage.setItem(KEYS.SNACKS, JSON.stringify(mockSnacks));
     
     localStorage.setItem('cinewave_data_version', DATA_VERSION);
   }
@@ -45,12 +51,18 @@ export const getTheatres = (): Theatre[] => getData<Theatre>(KEYS.THEATRES);
 export const getShows = (): Show[] => getData<Show>(KEYS.SHOWS);
 export const getUsers = (): User[] => getData<User>(KEYS.USERS);
 export const getBookings = (): Booking[] => getData<Booking>(KEYS.BOOKINGS);
+export const getReviews = (): Review[] => getData<Review>(KEYS.REVIEWS);
+export const getPromoCodes = (): PromoCode[] => getData<PromoCode>(KEYS.PROMO_CODES);
+export const getSnacks = (): SnackItem[] => getData<SnackItem>(KEYS.SNACKS);
 
 export const saveBookings = (bookings: Booking[]) => setData(KEYS.BOOKINGS, bookings);
 export const saveMovies = (movies: Movie[]) => setData(KEYS.MOVIES, movies);
 export const saveTheatres = (theatres: Theatre[]) => setData(KEYS.THEATRES, theatres);
 export const saveShows = (shows: Show[]) => setData(KEYS.SHOWS, shows);
 export const saveUsers = (users: User[]) => setData(KEYS.USERS, users);
+export const saveReviews = (reviews: Review[]) => setData(KEYS.REVIEWS, reviews);
+export const savePromoCodes = (promoCodes: PromoCode[]) => setData(KEYS.PROMO_CODES, promoCodes);
+export const saveSnacks = (snacks: SnackItem[]) => setData(KEYS.SNACKS, snacks);
 
 // Current User
 export const getCurrentUser = (): User | null => {

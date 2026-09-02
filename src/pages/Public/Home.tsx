@@ -103,7 +103,7 @@ const Home = () => {
                 EXPLORE MOVIES
               </Button>
             </Link>
-          </div>
+          </motion.div>
         </div>
       </section>
 

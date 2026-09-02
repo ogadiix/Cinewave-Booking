@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { getShows, getMovies, getTheatres, getBookings, saveBookings, getCurrentUser } from '../../utils/storage';
-import type { Show, Movie, Theatre } from '../../types';
+import { getShows, getMovies, getTheatres, getBookings, saveBookings, getCurrentUser, getPromoCodes, getSnacks } from '../../utils/storage';
+import { calculateTotalSeatPrice } from '../../utils/pricing';
+import type { Show, Movie, Theatre, PromoCode, SnackItem } from '../../types';
 import Button from '../../components/ui/Button';
 import { useToast } from '../../context/ToastContext';
-import { ArrowLeft, Ticket, CreditCard, ShieldCheck, Lock, Smartphone } from 'lucide-react';
+import { ArrowLeft, Ticket, CreditCard, ShieldCheck, Lock, Smartphone, Tag, Coffee, Plus, Minus } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const BookingSummary = () => {
@@ -21,6 +22,15 @@ const BookingSummary = () => {
   
   const [paymentStep, setPaymentStep] = useState<'summary' | 'payment' | 'processing'>('summary');
   const [paymentMethod, setPaymentMethod] = useState<'card' | 'upi'>('card');
+  
+  // Promo Code State
+  const [promoInput, setPromoInput] = useState('');
+  const [appliedPromo, setAppliedPromo] = useState<PromoCode | null>(null);
+  const [promoError, setPromoError] = useState('');
+  
+  // Snacks State
+  const [availableSnacks, setAvailableSnacks] = useState<SnackItem[]>([]);
+  const [selectedSnacks, setSelectedSnacks] = useState<Record<string, number>>({});
 
   useEffect(() => {
     if (!showId || selectedSeats.length === 0) {
@@ -33,6 +43,7 @@ const BookingSummary = () => {
       setShow(currentShow);
       setMovie(getMovies().find(m => m.id === currentShow.movieId) || null);
       setTheatre(getTheatres().find(t => t.id === currentShow.theatreId) || null);
+      setAvailableSnacks(getSnacks().filter(s => s.category !== 'Other' || true)); // Fetch all snacks
     }
   }, [showId, selectedSeats, navigate]);
 
@@ -44,6 +55,28 @@ const BookingSummary = () => {
       return;
     }
     setPaymentStep('payment');
+  };
+
+  const handleApplyPromo = () => {
+    setPromoError('');
+    if (!promoInput.trim()) return;
+    
+    const codes = getPromoCodes();
+    const found = codes.find(c => c.code.toUpperCase() === promoInput.toUpperCase());
+    
+    if (!found) {
+      setPromoError('Invalid promo code');
+    } else if (!found.isActive) {
+      setPromoError('This promo code has expired');
+    } else {
+      setAppliedPromo(found);
+      addToast('Promo code applied!', 'success');
+    }
+  };
+
+  const handleRemovePromo = () => {
+    setAppliedPromo(null);
+    setPromoInput('');
   };
 
   const handleProcessPayment = (e: React.FormEvent) => {
@@ -59,7 +92,8 @@ const BookingSummary = () => {
         userId: user!.id,
         showId: show.id,
         seats: selectedSeats,
-        totalAmount: selectedSeats.length * show.ticketPrice,
+        snacks: Object.entries(selectedSnacks).map(([snackId, quantity]) => ({ snackId, quantity })).filter(s => s.quantity > 0),
+        totalAmount: total,
         status: 'CONFIRMED' as const,
         bookingDate: new Date().toISOString()
       };
@@ -74,10 +108,37 @@ const BookingSummary = () => {
 
   if (!show || !movie || !theatre) return null;
 
-  const subtotal = selectedSeats.length * show.ticketPrice;
+  const ticketsSubtotal = calculateTotalSeatPrice(selectedSeats, show.ticketPrice);
   const convenienceFee = selectedSeats.length * 30; // 30 per ticket
-  const taxes = subtotal * 0.18; // 18% GST
-  const total = subtotal + convenienceFee + taxes;
+  
+  const snacksSubtotal = Object.entries(selectedSnacks).reduce((sum, [snackId, qty]) => {
+    const snack = availableSnacks.find(s => s.id === snackId);
+    return sum + (snack ? snack.price * qty : 0);
+  }, 0);
+
+  const subtotal = ticketsSubtotal + snacksSubtotal;
+  
+  let discount = 0;
+  if (appliedPromo) {
+    discount = (subtotal * appliedPromo.discountPercentage) / 100;
+  }
+  
+  const discountedSubtotal = subtotal - discount;
+  const taxes = discountedSubtotal * 0.18; // 18% GST on discounted subtotal
+  const total = discountedSubtotal + convenienceFee + taxes;
+
+  const handleUpdateSnack = (snackId: string, delta: number) => {
+    setSelectedSnacks(prev => {
+      const current = prev[snackId] || 0;
+      const next = Math.max(0, current + delta);
+      if (next === 0) {
+        const copy = { ...prev };
+        delete copy[snackId];
+        return copy;
+      }
+      return { ...prev, [snackId]: next };
+    });
+  };
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl relative min-h-[70vh]">
@@ -140,6 +201,45 @@ const BookingSummary = () => {
                 </div>
               </div>
 
+              {/* Snacks Section */}
+              <div className="glass p-6 rounded-xl border border-gray-800">
+                <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                  <Coffee className="text-primary-500" /> Add Food & Beverage
+                </h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {availableSnacks.map(snack => {
+                    const qty = selectedSnacks[snack.id] || 0;
+                    return (
+                      <div key={snack.id} className="flex gap-4 p-3 bg-gray-800/30 rounded-lg border border-gray-800">
+                        <img src={snack.image} alt={snack.name} className="w-16 h-16 object-cover rounded-md" />
+                        <div className="flex-1 flex flex-col justify-between">
+                          <div>
+                            <h4 className="text-sm font-bold text-white line-clamp-1">{snack.name}</h4>
+                            <p className="text-xs text-gray-400">₹{snack.price}</p>
+                          </div>
+                          <div className="flex items-center gap-3 mt-2">
+                            <button 
+                              onClick={() => handleUpdateSnack(snack.id, -1)}
+                              disabled={qty === 0}
+                              className="w-6 h-6 rounded-full bg-gray-700 flex items-center justify-center text-gray-300 disabled:opacity-50"
+                            >
+                              <Minus size={14} />
+                            </button>
+                            <span className="text-sm font-medium text-white w-4 text-center">{qty}</span>
+                            <button 
+                              onClick={() => handleUpdateSnack(snack.id, 1)}
+                              className="w-6 h-6 rounded-full bg-primary-600 flex items-center justify-center text-white"
+                            >
+                              <Plus size={14} />
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
               <div className="glass p-6 rounded-xl border border-gray-800">
                 <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
                   <ShieldCheck className="text-primary-500" /> Cancellation Policy
@@ -156,9 +256,21 @@ const BookingSummary = () => {
                 
                 <div className="space-y-4 mb-6 text-sm">
                   <div className="flex justify-between">
-                    <span className="text-gray-400">Tickets ({selectedSeats.length} × ₹{show.ticketPrice})</span>
-                    <span className="text-white">₹{subtotal.toFixed(2)}</span>
+                    <span className="text-gray-400">Tickets ({selectedSeats.length})</span>
+                    <span className="text-white">₹{ticketsSubtotal.toFixed(2)}</span>
                   </div>
+                  {snacksSubtotal > 0 && (
+                    <div className="flex justify-between">
+                      <span className="text-gray-400">Food & Beverage</span>
+                      <span className="text-white">₹{snacksSubtotal.toFixed(2)}</span>
+                    </div>
+                  )}
+                  {appliedPromo && (
+                    <div className="flex justify-between text-green-400">
+                      <span>Discount ({appliedPromo.discountPercentage}%)</span>
+                      <span>-₹{discount.toFixed(2)}</span>
+                    </div>
+                  )}
                   <div className="flex justify-between">
                     <span className="text-gray-400">Convenience Fee</span>
                     <span className="text-white">₹{convenienceFee.toFixed(2)}</span>
@@ -167,6 +279,33 @@ const BookingSummary = () => {
                     <span className="text-gray-400">Taxes (18% GST)</span>
                     <span className="text-white">₹{taxes.toFixed(2)}</span>
                   </div>
+                </div>
+
+                {/* Promo Code Section */}
+                <div className="mb-6 pt-4 border-t border-gray-800">
+                  <h4 className="text-sm font-medium text-white mb-2 flex items-center gap-2">
+                    <Tag size={16} className="text-primary-500" /> Apply Promo Code
+                  </h4>
+                  {!appliedPromo ? (
+                    <div>
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          value={promoInput}
+                          onChange={(e) => setPromoInput(e.target.value.toUpperCase())}
+                          placeholder="Enter code"
+                          className="flex-1 bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-primary-500 uppercase"
+                        />
+                        <Button size="sm" onClick={handleApplyPromo} disabled={!promoInput.trim()}>Apply</Button>
+                      </div>
+                      {promoError && <p className="text-red-400 text-xs mt-1">{promoError}</p>}
+                    </div>
+                  ) : (
+                    <div className="flex justify-between items-center bg-green-500/10 border border-green-500/30 rounded-lg px-3 py-2 text-sm text-green-400">
+                      <span className="font-bold">{appliedPromo.code} Applied</span>
+                      <button onClick={handleRemovePromo} className="hover:text-white underline text-xs">Remove</button>
+                    </div>
+                  )}
                 </div>
 
                 <div className="pt-4 border-t border-gray-800 mb-8">

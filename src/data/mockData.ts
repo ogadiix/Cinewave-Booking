@@ -1,4 +1,4 @@
-import type { Movie, Theatre, Show, User, Booking } from '../types';
+import type { Movie, Theatre, Show, User, Booking, Review, PromoCode, SnackItem } from '../types';
 
 export const mockUsers: User[] = [
   { id: 'u1', name: 'Demo Customer', email: 'customer@cinewave.com', phone: '9876543210', role: 'customer', status: 'active', createdDate: '2026-01-01' },
@@ -171,3 +171,36 @@ export const mockShows: Show[] = [
 ];
 
 export const mockBookings: Booking[] = [];
+
+export const mockReviews: Review[] = [
+  {
+    id: 'r1',
+    movieId: 'm1',
+    userId: 'u1',
+    rating: 5,
+    comment: 'Absolutely mind-blowing visuals and great story!',
+    date: '2026-08-15'
+  },
+  {
+    id: 'r2',
+    movieId: 'm1',
+    userId: 'u2',
+    rating: 4,
+    comment: 'Good, but the pacing could be better in the first half.',
+    date: '2026-08-16'
+  }
+];
+
+export const mockPromoCodes: PromoCode[] = [
+  { id: 'pc1', code: 'WELCOME10', discountPercentage: 10, isActive: true },
+  { id: 'pc2', code: 'FESTIVAL20', discountPercentage: 20, isActive: true },
+  { id: 'pc3', code: 'EXPIRED50', discountPercentage: 50, isActive: false },
+];
+
+export const mockSnacks: SnackItem[] = [
+  { id: 'snack1', name: 'Large Popcorn', description: 'Freshly popped salted popcorn', price: 350, image: 'https://images.unsplash.com/photo-1578849278619-e73505e9610f?w=300&h=300&fit=crop', category: 'Popcorn' },
+  { id: 'snack2', name: 'Caramel Popcorn', description: 'Sweet and crunchy caramel coated popcorn', price: 400, image: 'https://images.unsplash.com/photo-1585671569438-e9f80164c9d7?w=300&h=300&fit=crop', category: 'Popcorn' },
+  { id: 'snack3', name: 'Coke Large', description: 'Chilled Coca-Cola', price: 200, image: 'https://images.unsplash.com/photo-1622483767028-3f66f32aef97?w=300&h=300&fit=crop', category: 'Beverage' },
+  { id: 'snack4', name: 'Nachos with Salsa', description: 'Crispy nachos served with spicy salsa dip', price: 300, image: 'https://images.unsplash.com/photo-1513456852971-30c0b8199d4d?w=300&h=300&fit=crop', category: 'Other' },
+  { id: 'snack5', name: 'Movie Combo 1', description: 'Large Popcorn + 2 Coke Large', price: 650, image: 'https://images.unsplash.com/photo-1543826270-f42f2ed1c750?w=300&h=300&fit=crop', category: 'Combo' },
+];

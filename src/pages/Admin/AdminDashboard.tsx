@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { getMovies, getTheatres, getShows, getUsers, getBookings } from '../../utils/storage';
-import { Users, Film, MapPin, CalendarClock, DollarSign, Ticket } from 'lucide-react';
+import { getMovies, getTheatres, getShows, getUsers, getBookings, getPromoCodes, getSnacks } from '../../utils/storage';
+import { Users, Film, MapPin, CalendarClock, DollarSign, Ticket, Tag, Coffee } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 
@@ -11,6 +11,8 @@ const AdminDashboard = () => {
     theatres: 0,
     shows: 0,
     bookings: 0,
+    promoCodes: 0,
+    snacks: 0,
     revenue: 0
   });
 
@@ -20,6 +22,8 @@ const AdminDashboard = () => {
     const theatres = getTheatres();
     const shows = getShows();
     const bookings = getBookings();
+    const promoCodes = getPromoCodes();
+    const snacks = getSnacks();
     
     const revenue = bookings
       .filter(b => b.status === 'CONFIRMED' || b.status === 'COMPLETED')
@@ -31,6 +35,8 @@ const AdminDashboard = () => {
       theatres: theatres.length,
       shows: shows.length,
       bookings: bookings.length,
+      promoCodes: promoCodes.length,
+      snacks: snacks.length,
       revenue
     });
   }, []);
@@ -40,6 +46,8 @@ const AdminDashboard = () => {
     { title: 'Movies', value: stats.movies, icon: <Film size={24} />, color: 'text-purple-500', bg: 'bg-purple-500/20', link: '/admin/movies' },
     { title: 'Theatres', value: stats.theatres, icon: <MapPin size={24} />, color: 'text-pink-500', bg: 'bg-pink-500/20', link: '/admin/theatres' },
     { title: 'Shows', value: stats.shows, icon: <CalendarClock size={24} />, color: 'text-orange-500', bg: 'bg-orange-500/20', link: '/admin/shows' },
+    { title: 'Promo Codes', value: stats.promoCodes, icon: <Tag size={24} />, color: 'text-yellow-500', bg: 'bg-yellow-500/20', link: '/admin/promocodes' },
+    { title: 'Snacks', value: stats.snacks, icon: <Coffee size={24} />, color: 'text-red-500', bg: 'bg-red-500/20', link: '/admin/snacks' },
     { title: 'Bookings', value: stats.bookings, icon: <Ticket size={24} />, color: 'text-green-500', bg: 'bg-green-500/20', link: '#' },
     { title: 'Revenue', value: `₹${stats.revenue}`, icon: <DollarSign size={24} />, color: 'text-primary-500', bg: 'bg-primary-500/20', link: '#' },
   ];

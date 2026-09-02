@@ -32,7 +32,8 @@ import AdminDashboard from './pages/Admin/AdminDashboard';
 import AdminMovies from './pages/Admin/AdminMovies';
 import AdminTheatres from './pages/Admin/AdminTheatres';
 import AdminShows from './pages/Admin/AdminShows';
-import AdminUsers from './pages/Admin/AdminUsers';
+import AdminPromoCodes from './pages/Admin/AdminPromoCodes';
+import AdminSnacks from './pages/Admin/AdminSnacks';
 
 
 function App() {
@@ -78,7 +79,8 @@ function App() {
             <Route path="movies" element={<AdminMovies />} />
             <Route path="theatres" element={<AdminTheatres />} />
             <Route path="shows" element={<AdminShows />} />
-            <Route path="users" element={<AdminUsers />} />
+            <Route path="promocodes" element={<AdminPromoCodes />} />
+            <Route path="snacks" element={<AdminSnacks />} />
             <Route index element={<Navigate to="dashboard" replace />} />
           </Route>
         </Routes>

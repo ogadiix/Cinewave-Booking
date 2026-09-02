@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Calendar, Clock, MapPin, Play, Star, Ticket } from 'lucide-react';
 import { format } from 'date-fns';
-import { getMovies, getShows, getTheatres } from '../../utils/storage';
-import type { Movie, Show, Theatre } from '../../types';
+import { getMovies, getShows, getTheatres, getReviews, getUsers } from '../../utils/storage';
+import type { Movie, Show, Theatre, Review, User } from '../../types';
 import Button from '../../components/ui/Button';
 import Badge from '../../components/ui/Badge';
 import { motion } from 'framer-motion';
@@ -16,6 +16,7 @@ const MovieDetails = () => {
   const [movie, setMovie] = useState<Movie | null>(null);
   const [shows, setShows] = useState<Show[]>([]);
   const [theatres, setTheatres] = useState<Record<string, Theatre>>({});
+  const [reviews, setReviews] = useState<(Review & { user?: User })[]>([]);
   
   const [selectedDate, setSelectedDate] = useState<string>('');
   const { city } = useLocation();
@@ -54,6 +55,15 @@ const MovieDetails = () => {
         } else {
           setSelectedDate('');
         }
+
+        // Fetch and enrich reviews
+        const movieReviews = getReviews().filter(r => r.movieId === id);
+        const allUsers = getUsers();
+        const enrichedReviews = movieReviews.map(r => ({
+          ...r,
+          user: allUsers.find(u => u.id === r.userId)
+        }));
+        setReviews(enrichedReviews.reverse()); // Latest first
       }
     }
   }, [id, city]);
@@ -80,6 +90,10 @@ const MovieDetails = () => {
     acc[show.theatreId].push(show);
     return acc;
   }, {} as Record<string, Show[]>);
+
+  const averageRating = reviews.length > 0 
+    ? (reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1)
+    : 'New';
 
   const handleShowSelect = (show: Show) => {
     // Navigate to seat selection with show data
@@ -127,7 +141,13 @@ const MovieDetails = () => {
                 <Badge variant="outline" className="flex items-center gap-1"><Clock size={12} /> {movie.duration}</Badge>
               </div>
               <h1 className="text-4xl md:text-5xl font-bold mb-4">{movie.title}</h1>
-              <p className="text-xl text-gray-300 mb-6">{movie.genre}</p>
+              <div className="flex items-center gap-4 text-xl text-gray-300 mb-6">
+                <span>{movie.genre}</span>
+                <span className="flex items-center gap-1 text-yellow-400 font-bold">
+                  <Star fill="currentColor" size={20} />
+                  {averageRating} {reviews.length > 0 && <span className="text-sm font-normal text-gray-400">({reviews.length} reviews)</span>}
+                </span>
+              </div>
               
               <div className="flex gap-4">
                 <Button size="lg" className="px-8 rounded-full shadow-lg shadow-primary-600/20" onClick={() => {
@@ -154,9 +174,39 @@ const MovieDetails = () => {
           {/* About Movie */}
           <section>
             <h2 className="text-2xl font-bold text-white mb-4">About the Movie</h2>
-            <p className="text-gray-400 leading-relaxed text-lg">
+            <p className="text-gray-400 leading-relaxed text-lg mb-8">
               {movie.description}
             </p>
+          </section>
+
+          {/* User Reviews Section */}
+          <section>
+            <h2 className="text-2xl font-bold text-white mb-6">User Reviews</h2>
+            {reviews.length > 0 ? (
+              <div className="space-y-4">
+                {reviews.map(review => (
+                  <div key={review.id} className="glass p-5 rounded-xl border border-gray-800">
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-2">
+                        <div className="w-8 h-8 rounded-full bg-primary-900 flex items-center justify-center font-bold text-primary-400 text-sm">
+                          {review.user?.name.charAt(0) || 'U'}
+                        </div>
+                        <span className="font-semibold text-white">{review.user?.name || 'User'}</span>
+                      </div>
+                      <span className="text-xs text-gray-500">{format(new Date(review.date), 'dd MMM yyyy')}</span>
+                    </div>
+                    <div className="flex text-yellow-400 mb-2">
+                      {[...Array(5)].map((_, i) => (
+                        <Star key={i} size={14} fill={i < review.rating ? "currentColor" : "none"} className={i >= review.rating ? "text-gray-600" : ""} />
+                      ))}
+                    </div>
+                    <p className="text-gray-300 text-sm">{review.comment}</p>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-gray-500 italic">No reviews yet for this movie.</p>
+            )}
           </section>
 
           {/* Booking Section */}
@@ -242,7 +292,7 @@ const MovieDetails = () => {
               </div>
             )}
           </section>
-        </div>
+        </motion.div>
         
         {/* Sidebar Info */}
         <div className="space-y-6">

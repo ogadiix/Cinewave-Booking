@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { getShows, getMovies, getTheatres, getBookings } from '../../utils/storage';
+import { getSeatTier, getSeatPrice, calculateTotalSeatPrice, getTierColor } from '../../utils/pricing';
 import type { Show, Movie, Theatre } from '../../types';
 import Button from '../../components/ui/Button';
 import { useToast } from '../../context/ToastContext';
@@ -56,7 +57,7 @@ const SeatSelection = () => {
         return prev.filter(id => id !== seatId);
       } else {
         if (prev.length >= maxSelection) {
-          addToast(`You can only select up to ${maxSelection} seats`, 'warning');
+          addToast(`You can only select up to ${maxSelection} seats`, 'info');
           return prev;
         }
         return [...prev, seatId];
@@ -66,7 +67,7 @@ const SeatSelection = () => {
 
   const handleProceed = () => {
     if (selectedSeats.length === 0) {
-      addToast('Please select at least one seat', 'warning');
+      addToast('Please select at least one seat', 'info');
       return;
     }
     
@@ -117,6 +118,8 @@ const SeatSelection = () => {
                       
                       // Create an aisle in the middle
                       const isAisle = idx === Math.floor(seatsPerRow / 2) - 1;
+                      const tier = getSeatTier(seatId);
+                      const tierColorClass = getTierColor(tier);
                       
                       return (
                         <React.Fragment key={seatId}>
@@ -127,12 +130,12 @@ const SeatSelection = () => {
                             whileTap={!isBooked ? { scale: 0.9 } : {}}
                             className={`
                               w-8 h-8 sm:w-10 sm:h-10 rounded-t-lg rounded-b-sm text-xs font-medium transition-colors
-                              flex items-center justify-center
+                              flex items-center justify-center border-t-2
                               ${isBooked 
-                                ? 'bg-gray-800 text-gray-600 cursor-not-allowed border border-gray-700' 
+                                ? 'bg-gray-800 text-gray-600 cursor-not-allowed border-gray-700' 
                                 : isSelected
-                                  ? 'bg-primary-500 text-white shadow-lg shadow-primary-500/40'
-                                  : 'bg-gray-700 text-gray-300 hover:bg-gray-600 border border-gray-600'
+                                  ? 'bg-primary-500 text-white shadow-lg shadow-primary-500/40 border-primary-400'
+                                  : `bg-gray-700 text-gray-300 hover:bg-gray-600 ${tierColorClass}`
                               }
                             `}
                           >
@@ -148,18 +151,35 @@ const SeatSelection = () => {
             </div>
           </div>
 
-          <div className="mt-12 flex justify-center gap-8">
-            <div className="flex items-center gap-2">
-              <div className="w-6 h-6 rounded-t text-xs font-medium bg-gray-700 border border-gray-600" />
-              <span className="text-sm text-gray-400">Available</span>
+          <div className="mt-8 flex flex-col items-center gap-4">
+            <div className="flex justify-center gap-8 text-sm">
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-4 rounded border-t-2 border-yellow-500/50 bg-gray-700" />
+                <span className="text-gray-400">VIP (₹{show.ticketPrice + 150})</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-4 rounded border-t-2 border-blue-500/50 bg-gray-700" />
+                <span className="text-gray-400">Premium (₹{show.ticketPrice + 50})</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-4 rounded border-t-2 border-gray-600 bg-gray-700" />
+                <span className="text-gray-400">Standard (₹{show.ticketPrice})</span>
+              </div>
             </div>
-            <div className="flex items-center gap-2">
-              <div className="w-6 h-6 rounded-t text-xs font-medium bg-primary-500 shadow-md shadow-primary-500/40" />
-              <span className="text-sm text-gray-400">Selected</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-6 h-6 rounded-t text-xs font-medium bg-gray-800 border border-gray-700" />
-              <span className="text-sm text-gray-400">Sold</span>
+            
+            <div className="flex justify-center gap-8 mt-2">
+              <div className="flex items-center gap-2">
+                <div className="w-6 h-6 rounded-t text-xs font-medium bg-gray-700 border-t-2 border-gray-600" />
+                <span className="text-sm text-gray-400">Available</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-6 h-6 rounded-t text-xs font-medium bg-primary-500 shadow-md shadow-primary-500/40 border-t-2 border-primary-400" />
+                <span className="text-sm text-gray-400">Selected</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-6 h-6 rounded-t text-xs font-medium bg-gray-800 border-t-2 border-gray-700" />
+                <span className="text-sm text-gray-400">Sold</span>
+              </div>
             </div>
           </div>
         </div>
@@ -202,7 +222,7 @@ const SeatSelection = () => {
             <div className="pt-6 border-t border-gray-800 mb-6">
               <div className="flex justify-between items-center">
                 <span className="text-gray-400">Total Amount</span>
-                <span className="text-2xl font-bold text-white">₹{selectedSeats.length * show.ticketPrice}</span>
+                <span className="text-2xl font-bold text-white">₹{calculateTotalSeatPrice(selectedSeats, show.ticketPrice)}</span>
               </div>
             </div>
 

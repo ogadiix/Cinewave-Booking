@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { getCurrentUser, getBookings, getShows, getMovies, getTheatres, saveBookings } from '../../utils/storage';
-import type { Booking, Show, Movie, Theatre } from '../../types';
+import { getCurrentUser, getBookings, getShows, getMovies, getTheatres, saveBookings, getReviews, saveReviews } from '../../utils/storage';
+import type { Booking, Show, Movie, Theatre, Review } from '../../types';
 import Button from '../../components/ui/Button';
 import { useToast } from '../../context/ToastContext';
-import { Ticket, XCircle, Download, ExternalLink } from 'lucide-react';
+import { Ticket, XCircle, Download, ExternalLink, Star } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import Badge from '../../components/ui/Badge';
 
@@ -18,6 +18,12 @@ const MyBookings = () => {
   const user = getCurrentUser();
   const { addToast } = useToast();
   const [bookings, setBookings] = useState<EnrichedBooking[]>([]);
+  
+  // Review Modal State
+  const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
+  const [selectedMovieId, setSelectedMovieId] = useState<string>('');
+  const [reviewRating, setReviewRating] = useState(5);
+  const [reviewComment, setReviewComment] = useState('');
 
   const loadBookings = () => {
     if (user) {
@@ -57,6 +63,31 @@ const MyBookings = () => {
       addToast('Booking cancelled successfully', 'success');
       loadBookings();
     }
+  };
+
+  const handleOpenReview = (movieId: string) => {
+    setSelectedMovieId(movieId);
+    setReviewRating(5);
+    setReviewComment('');
+    setIsReviewModalOpen(true);
+  };
+
+  const handleSubmitReview = () => {
+    if (!user || !selectedMovieId) return;
+
+    const newReview: Review = {
+      id: `rev_${Date.now()}`,
+      movieId: selectedMovieId,
+      userId: user.id,
+      rating: reviewRating,
+      comment: reviewComment,
+      date: new Date().toISOString().split('T')[0]
+    };
+
+    const currentReviews = getReviews();
+    saveReviews([...currentReviews, newReview]);
+    addToast('Review submitted successfully!', 'success');
+    setIsReviewModalOpen(false);
   };
 
   return (
@@ -150,7 +181,18 @@ const MyBookings = () => {
                 )}
                 
                 {booking.status === 'COMPLETED' && (
-                  <p className="text-sm text-center text-green-400 w-full">Completed</p>
+                  <>
+                    <p className="text-sm text-center text-green-400 w-full mb-2">Completed</p>
+                    {booking.movie && (
+                      <Button 
+                        variant="outline" 
+                        className="w-full h-10 px-0 flex-1 border-primary-500 text-primary-400 hover:bg-primary-500/10"
+                        onClick={() => handleOpenReview(booking.movie!.id)}
+                      >
+                        <Star size={16} className="mr-2" /> Review
+                      </Button>
+                    )}
+                  </>
                 )}
               </div>
             </div>
@@ -166,6 +208,52 @@ const MyBookings = () => {
           <Link to="/movies" className="inline-flex items-center justify-center h-10 px-6 rounded-md bg-primary-600 text-white font-medium hover:bg-primary-500 transition-colors">
             Book Tickets Now
           </Link>
+        </div>
+      )}
+
+      {/* Review Modal */}
+      {isReviewModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+          <div className="bg-gray-900 border border-gray-800 rounded-xl w-full max-w-md overflow-hidden flex flex-col">
+            <div className="p-6 border-b border-gray-800 flex justify-between items-center">
+              <h3 className="text-xl font-bold text-white">Leave a Review</h3>
+              <button onClick={() => setIsReviewModalOpen(false)} className="text-gray-400 hover:text-white">
+                <XCircle size={24} />
+              </button>
+            </div>
+            
+            <div className="p-6 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-400 mb-2">Rating</label>
+                <div className="flex gap-2">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <button
+                      key={star}
+                      onClick={() => setReviewRating(star)}
+                      className={`p-1 transition-colors ${reviewRating >= star ? 'text-yellow-400' : 'text-gray-600 hover:text-yellow-400/50'}`}
+                    >
+                      <Star size={32} fill={reviewRating >= star ? "currentColor" : "none"} />
+                    </button>
+                  ))}
+                </div>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-400 mb-2">Comment</label>
+                <textarea
+                  value={reviewComment}
+                  onChange={(e) => setReviewComment(e.target.value)}
+                  className="w-full bg-gray-800 border border-gray-700 rounded-lg p-3 text-white h-32 focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none"
+                  placeholder="Share your thoughts about the movie..."
+                />
+              </div>
+            </div>
+            
+            <div className="p-6 border-t border-gray-800 bg-gray-800/50 flex justify-end gap-3">
+              <Button variant="outline" onClick={() => setIsReviewModalOpen(false)}>Cancel</Button>
+              <Button onClick={handleSubmitReview}>Submit Review</Button>
+            </div>
+          </div>
         </div>
       )}
     </div>

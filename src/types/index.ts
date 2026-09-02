@@ -44,7 +44,33 @@ export interface Booking {
   userId: string;
   showId: string;
   seats: string[];
+  snacks?: { snackId: string; quantity: number }[];
   totalAmount: number;
   status: 'CONFIRMED' | 'CANCELLED' | 'COMPLETED';
   bookingDate: string;
+}
+
+export interface Review {
+  id: string;
+  movieId: string;
+  userId: string;
+  rating: number; // 1 to 5
+  comment: string;
+  date: string;
+}
+
+export interface PromoCode {
+  id: string;
+  code: string;
+  discountPercentage: number;
+  isActive: boolean;
+}
+
+export interface SnackItem {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  image: string;
+  category: 'Popcorn' | 'Beverage' | 'Combo' | 'Other';
 }
