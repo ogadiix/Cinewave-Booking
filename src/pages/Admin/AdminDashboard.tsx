@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { getMovies, getTheatres, getShows, getUsers, getBookings } from '../../utils/storage';
 import { Users, Film, MapPin, CalendarClock, DollarSign, Ticket } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { motion } from 'framer-motion';
 
 const AdminDashboard = () => {
   const [stats, setStats] = useState({
@@ -44,7 +45,11 @@ const AdminDashboard = () => {
   ];
 
   return (
-    <div className="max-w-7xl mx-auto">
+    <motion.div 
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      className="max-w-7xl mx-auto"
+    >
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-white mb-2">Admin Dashboard</h1>
         <p className="text-gray-400">System overview and management statistics.</p>
@@ -52,19 +57,26 @@ const AdminDashboard = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
         {statCards.map((card, idx) => (
-          <Link key={idx} to={card.link}>
-            <div className="glass p-6 rounded-xl border border-gray-800 hover:border-gray-700 transition-colors group">
-              <div className="flex items-center gap-4">
-                <div className={`w-14 h-14 rounded-full ${card.bg} ${card.color} flex items-center justify-center group-hover:scale-110 transition-transform`}>
-                  {card.icon}
-                </div>
-                <div>
-                  <p className="text-sm text-gray-400 mb-1">{card.title}</p>
-                  <h3 className="text-3xl font-bold text-white">{card.value}</h3>
+          <motion.div
+            key={idx}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: idx * 0.1 }}
+          >
+            <Link to={card.link} className="block h-full">
+              <div className="glass p-6 rounded-xl border border-gray-800 hover:border-gray-700 transition-colors group h-full">
+                <div className="flex items-center gap-4">
+                  <div className={`w-14 h-14 rounded-full ${card.bg} ${card.color} flex items-center justify-center group-hover:scale-110 transition-transform`}>
+                    {card.icon}
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-400 mb-1">{card.title}</p>
+                    <h3 className="text-3xl font-bold text-white">{card.value}</h3>
+                  </div>
                 </div>
               </div>
-            </div>
-          </Link>
+            </Link>
+          </motion.div>
         ))}
       </div>
 
@@ -116,7 +128,7 @@ const AdminDashboard = () => {
           </div>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 };
 

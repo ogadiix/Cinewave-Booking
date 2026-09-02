@@ -4,6 +4,7 @@ import type { User } from '../../types';
 import Button from '../../components/ui/Button';
 import { useToast } from '../../context/ToastContext';
 import { User as UserIcon, Mail, Phone, Shield } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 const Profile = () => {
   const [user, setUser] = useState<User | null>(null);
@@ -58,7 +59,11 @@ const Profile = () => {
   if (!user) return null;
 
   return (
-    <div className="max-w-4xl mx-auto py-8">
+    <motion.div 
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      className="max-w-4xl mx-auto py-8"
+    >
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-white mb-2">My Profile</h1>
         <p className="text-gray-400">Manage your personal information and account settings.</p>
@@ -66,7 +71,12 @@ const Profile = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
         {/* Sidebar */}
-        <div className="md:col-span-1">
+        <motion.div 
+          initial={{ x: -20, opacity: 0 }}
+          animate={{ x: 0, opacity: 1 }}
+          transition={{ delay: 0.1 }}
+          className="md:col-span-1"
+        >
           <div className="glass p-8 rounded-2xl border border-gray-800 text-center flex flex-col items-center">
             <div className="w-24 h-24 rounded-full bg-primary-500/20 text-primary-500 flex items-center justify-center mb-4">
               <UserIcon size={48} />
@@ -85,10 +95,15 @@ const Profile = () => {
               <p>Account status: <span className="text-green-500">Active</span></p>
             </div>
           </div>
-        </div>
+        </motion.div>
 
         {/* Main Content */}
-        <div className="md:col-span-2">
+        <motion.div 
+          initial={{ x: 20, opacity: 0 }}
+          animate={{ x: 0, opacity: 1 }}
+          transition={{ delay: 0.2 }}
+          className="md:col-span-2"
+        >
           <div className="glass p-8 rounded-2xl border border-gray-800">
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-xl font-bold text-white">Personal Information</h3>
@@ -147,7 +162,11 @@ const Profile = () => {
               </div>
 
               {isEditing && (
-                <div className="flex gap-4 pt-4 border-t border-gray-800">
+                <motion.div 
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  className="flex gap-4 pt-4 border-t border-gray-800"
+                >
                   <Button type="button" variant="outline" onClick={() => {
                     setIsEditing(false);
                     setFormData({ name: user.name, email: user.email, phone: user.phone });
@@ -157,13 +176,13 @@ const Profile = () => {
                   <Button type="submit" isLoading={isLoading}>
                     Save Changes
                   </Button>
-                </div>
+                </motion.div>
               )}
             </form>
           </div>
-        </div>
+        </motion.div>
       </div>
-    </div>
+    </motion.div>
   );
 };
 

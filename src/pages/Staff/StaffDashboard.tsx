@@ -1,13 +1,19 @@
 import React, { useEffect, useState } from 'react';
 import { getBookings, getShows } from '../../utils/storage';
 import type { Booking, Show } from '../../types';
-import { Ticket, DollarSign, Calendar as CalendarIcon, Users } from 'lucide-react';
+import { Ticket, DollarSign, Calendar as CalendarIcon, Users, ScanLine, CheckCircle2 } from 'lucide-react';
 import Badge from '../../components/ui/Badge';
+import Button from '../../components/ui/Button';
 import { Link } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import { useToast } from '../../context/ToastContext';
 
 const StaffDashboard = () => {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [shows, setShows] = useState<Show[]>([]);
+  const [scanInput, setScanInput] = useState('');
+  const [scanResult, setScanResult] = useState<{success: boolean, message: string} | null>(null);
+  const { addToast } = useToast();
 
   useEffect(() => {
     setBookings(getBookings());
@@ -15,71 +21,110 @@ const StaffDashboard = () => {
   }, []);
 
   const totalBookings = bookings.length;
-  
-  // Calculate today's bookings (using a fixed mock date or dynamic date)
-  // For demo purposes, let's just count all CONFIRMED bookings as "active"
   const confirmedBookings = bookings.filter(b => b.status === 'CONFIRMED');
   const cancelledBookings = bookings.filter(b => b.status === 'CANCELLED');
-  
   const revenue = confirmedBookings.reduce((sum, b) => sum + b.totalAmount, 0);
 
+  const handleScan = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!scanInput.trim()) return;
+
+    // Simulate scanning delay
+    setTimeout(() => {
+      const booking = bookings.find(b => b.id === scanInput.trim());
+      if (booking) {
+        if (booking.status === 'CONFIRMED') {
+          setScanResult({ success: true, message: `Ticket Valid! Admitting ${booking.seats.length} guests for seats ${booking.seats.join(', ')}.` });
+          addToast('Ticket scanned successfully.', 'success');
+        } else {
+          setScanResult({ success: false, message: `Invalid Ticket Status: ${booking.status}` });
+          addToast('Invalid ticket status.', 'error');
+        }
+      } else {
+        setScanResult({ success: false, message: 'Ticket not found in the system.' });
+        addToast('Ticket not found.', 'error');
+      }
+      setScanInput('');
+    }, 800);
+  };
+
+  const statCards = [
+    { title: 'Total Bookings', value: totalBookings, icon: <Ticket size={24} />, color: 'text-blue-500', bg: 'bg-blue-500/20' },
+    { title: 'Confirmed', value: confirmedBookings.length, icon: <CalendarIcon size={24} />, color: 'text-green-500', bg: 'bg-green-500/20' },
+    { title: 'Cancelled', value: cancelledBookings.length, icon: <Users size={24} />, color: 'text-red-500', bg: 'bg-red-500/20' },
+    { title: 'Total Revenue', value: `₹${revenue}`, icon: <DollarSign size={24} />, color: 'text-primary-500', bg: 'bg-primary-500/20' }
+  ];
+
   return (
-    <div className="max-w-7xl mx-auto">
+    <motion.div 
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      className="max-w-7xl mx-auto"
+    >
       <div className="mb-8 flex justify-between items-end">
         <div>
           <h1 className="text-3xl font-bold text-white mb-2">Staff Dashboard</h1>
-          <p className="text-gray-400">Overview of today's cinema operations and bookings.</p>
+          <p className="text-gray-400">Overview of today's cinema operations and ticket scanning.</p>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <div className="glass p-6 rounded-xl border border-gray-800">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-full bg-blue-500/20 text-blue-500 flex items-center justify-center">
-              <Ticket size={24} />
-            </div>
-            <div>
-              <p className="text-sm text-gray-400 mb-1">Total Bookings</p>
-              <h3 className="text-2xl font-bold text-white">{totalBookings}</h3>
-            </div>
-          </div>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+        <div className="lg:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-6">
+          {statCards.map((card, idx) => (
+            <motion.div
+              key={idx}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: idx * 0.1 }}
+              className="glass p-6 rounded-xl border border-gray-800"
+            >
+              <div className="flex items-center gap-4">
+                <div className={`w-12 h-12 rounded-full ${card.bg} ${card.color} flex items-center justify-center`}>
+                  {card.icon}
+                </div>
+                <div>
+                  <p className="text-sm text-gray-400 mb-1">{card.title}</p>
+                  <h3 className="text-2xl font-bold text-white">{card.value}</h3>
+                </div>
+              </div>
+            </motion.div>
+          ))}
         </div>
 
-        <div className="glass p-6 rounded-xl border border-gray-800">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-full bg-green-500/20 text-green-500 flex items-center justify-center">
-              <CalendarIcon size={24} />
-            </div>
-            <div>
-              <p className="text-sm text-gray-400 mb-1">Confirmed</p>
-              <h3 className="text-2xl font-bold text-white">{confirmedBookings.length}</h3>
-            </div>
+        {/* Ticket Scanner Tool */}
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="glass p-6 rounded-xl border border-primary-500/30 bg-primary-500/5 relative overflow-hidden"
+        >
+          <div className="absolute top-0 right-0 p-4 opacity-10">
+            <ScanLine size={100} />
           </div>
-        </div>
+          <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2 relative z-10">
+            <ScanLine className="text-primary-500" /> Ticket Scanner
+          </h2>
+          <form onSubmit={handleScan} className="relative z-10">
+            <input 
+              type="text" 
+              value={scanInput}
+              onChange={(e) => setScanInput(e.target.value.toUpperCase())}
+              placeholder="Enter Booking ID (e.g. CW-2026-...)" 
+              className="w-full bg-gray-900 border border-gray-700 text-white rounded-lg px-4 py-3 mb-4 focus:outline-none focus:border-primary-500 font-mono"
+            />
+            <Button type="submit" className="w-full">Verify Ticket</Button>
+          </form>
 
-        <div className="glass p-6 rounded-xl border border-gray-800">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-full bg-red-500/20 text-red-500 flex items-center justify-center">
-              <Users size={24} />
-            </div>
-            <div>
-              <p className="text-sm text-gray-400 mb-1">Cancelled</p>
-              <h3 className="text-2xl font-bold text-white">{cancelledBookings.length}</h3>
-            </div>
-          </div>
-        </div>
-
-        <div className="glass p-6 rounded-xl border border-gray-800">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-full bg-primary-500/20 text-primary-500 flex items-center justify-center">
-              <DollarSign size={24} />
-            </div>
-            <div>
-              <p className="text-sm text-gray-400 mb-1">Total Revenue</p>
-              <h3 className="text-2xl font-bold text-white">₹{revenue}</h3>
-            </div>
-          </div>
-        </div>
+          {scanResult && (
+            <motion.div 
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className={`mt-4 p-3 rounded-lg flex items-start gap-2 text-sm ${scanResult.success ? 'bg-green-500/20 text-green-400 border border-green-500/30' : 'bg-red-500/20 text-red-400 border border-red-500/30'}`}
+            >
+              {scanResult.success ? <CheckCircle2 size={18} className="shrink-0 mt-0.5" /> : <ScanLine size={18} className="shrink-0 mt-0.5" />}
+              <p>{scanResult.message}</p>
+            </motion.div>
+          )}
+        </motion.div>
       </div>
 
       <div className="glass rounded-xl border border-gray-800 overflow-hidden">
@@ -132,7 +177,7 @@ const StaffDashboard = () => {
           </table>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 };
 
