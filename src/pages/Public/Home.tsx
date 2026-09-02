@@ -69,10 +69,10 @@ const Home = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3, duration: 0.8 }}
-            className="text-5xl md:text-7xl font-extrabold text-white mb-6 tracking-tight"
+            className="text-5xl md:text-7xl font-extrabold text-white mb-6 tracking-tight neon-text"
           >
             Your Movie.<br/>
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-400 to-primary-600">
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-400 to-primary-600 drop-shadow-[0_0_10px_rgba(6,182,212,0.8)]">
               Your Seats.
             </span><br/>
             Your Experience.
@@ -159,9 +159,9 @@ const Home = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <motion.div 
               whileHover={{ scale: 1.05 }}
-              className="glass p-8 rounded-2xl border border-white/5 text-center flex flex-col items-center"
+              className="glass-glow p-8 rounded-2xl text-center flex flex-col items-center"
             >
-              <div className="w-16 h-16 rounded-full bg-primary-600/20 text-primary-500 flex items-center justify-center mb-6">
+              <div className="w-16 h-16 rounded-full bg-primary-600/20 text-primary-500 flex items-center justify-center mb-6 shadow-[0_0_15px_rgba(6,182,212,0.3)]">
                 <Ticket size={32} />
               </div>
               <h3 className="text-xl font-bold text-white mb-3">Easy Booking</h3>
@@ -170,12 +170,12 @@ const Home = () => {
             
             <motion.div 
               whileHover={{ scale: 1.05 }}
-              className="glass p-8 rounded-2xl border border-white/5 text-center flex flex-col items-center transform md:-translate-y-4 relative z-10 shadow-2xl shadow-primary-900/20 bg-gray-800"
+              className="glass-glow p-8 rounded-2xl text-center flex flex-col items-center transform md:-translate-y-4 relative z-10 shadow-[0_0_30px_rgba(6,182,212,0.2)] bg-gray-900 border border-primary-500/30"
             >
-              <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+              <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 shadow-[0_0_15px_rgba(6,182,212,0.5)] rounded-full">
                 <Badge variant="success" className="bg-primary-500 text-white border-none py-1">MOST POPULAR</Badge>
               </div>
-              <div className="w-16 h-16 rounded-full bg-primary-600/20 text-primary-500 flex items-center justify-center mb-6 mt-4">
+              <div className="w-16 h-16 rounded-full bg-primary-600/20 text-primary-500 flex items-center justify-center mb-6 mt-4 shadow-[0_0_15px_rgba(6,182,212,0.3)]">
                 <Popcorn size={32} />
               </div>
               <h3 className="text-xl font-bold text-white mb-3">Choose Your Seats</h3>
@@ -184,9 +184,9 @@ const Home = () => {
             
             <motion.div 
               whileHover={{ scale: 1.05 }}
-              className="glass p-8 rounded-2xl border border-white/5 text-center flex flex-col items-center"
+              className="glass-glow p-8 rounded-2xl text-center flex flex-col items-center"
             >
-              <div className="w-16 h-16 rounded-full bg-primary-600/20 text-primary-500 flex items-center justify-center mb-6">
+              <div className="w-16 h-16 rounded-full bg-primary-600/20 text-primary-500 flex items-center justify-center mb-6 shadow-[0_0_15px_rgba(6,182,212,0.3)]">
                 <Video size={32} />
               </div>
               <h3 className="text-xl font-bold text-white mb-3">Instant Confirmation</h3>

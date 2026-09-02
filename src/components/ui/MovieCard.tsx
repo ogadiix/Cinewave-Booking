@@ -16,7 +16,7 @@ const MovieCard = ({ movie }: MovieCardProps) => {
       whileHover={{ y: -8, scale: 1.02 }}
       whileTap={{ scale: 0.98 }}
       transition={{ type: "spring", stiffness: 300, damping: 20 }}
-      className="group relative rounded-xl overflow-hidden bg-gray-900 border border-gray-800 hover:shadow-2xl hover:shadow-primary-500/20"
+      className="group relative rounded-xl overflow-hidden glass-glow cursor-pointer h-full flex flex-col"
     >
       <div className="aspect-[2/3] relative overflow-hidden">
         <img 
